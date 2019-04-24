@@ -5,5 +5,7 @@
 void iscrtaj_koordinatne_ose();
 void iscrtaj_mrezu();
 
+/* Funkcije za iscrtavanje objekata */
+void iscrtaj_letelicu();
 
 #endif

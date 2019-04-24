@@ -42,9 +42,32 @@ int main(int argc, char * argv[])
 	/* F-ja koja se poziva na pritisak tastera na tastaturi */
 	glutKeyboardFunc(on_key_press);
 
+	/* Uklucivanje osvetljenja */
+    GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1 };
+    GLfloat light_diffuse[] = { 1, 1, 1, 1 };
+    GLfloat light_specular[] = { 1, 1, 1, 1 };
+
+    /* Ambijentalno osvetljenje scene. */
+    GLfloat model_ambient[] = { 0.5, 0.5, 0.5, 1 };
+
+	glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    GLfloat light_position[] = { 1, 1, 1, 0 };
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
+
+    /* Normalizacija normala */
+	glEnable(GL_NORMALIZE);
+
+    /* Pozicionira se svijetlo. */
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+
 	/* Inicijalizacija OpenGL biblioteke */
 	/* Default boja u frame buffer-a kojom se cisti ekran */
-	glClearColor(1, 1, 1, 0);
+	glClearColor(0, 0, 0, 0);
 
 	/* Ukljucivanje kontrole dubine (z-buffer)*/
 	glEnable(GL_DEPTH_TEST);
@@ -60,20 +83,24 @@ static void on_display()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	/* Ovde se iscrtavaju sva cuda */
 
+    /* Pozicionira se svijetlo. */
+    static GLfloat light_position[] = {0, 0.5, -2.5, 0 }; 
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+
 	/* Ucitavanje MODELVIEW matrice */
 	glMatrixMode(GL_MODELVIEW);
 	/* Postavljanje MODELVIEW matrice na identity */
 	glLoadIdentity();
 	/* Gledaj u koordinatni pocetak sa poz. (3,2,0) */
-	gluLookAt(3, 2, 0, 0, 0, 0, 0, 1, 0);
-
-	/* Iscrtaj plav cajnik u koordinatnom pocetku */
-	glColor3f(0, 0, 1);
+	/*gluLookAt(2, 1, 0, 0, 0, 0, 0, 1, 0);*/
+	gluLookAt(0, 2.2, 3, 0, 0, -3, 0, 1, 0);
 
     #if DEBUG
         iscrtaj_koordinatne_ose();
         iscrtaj_mrezu();
     #endif
+        iscrtaj_letelicu();
 
 	glutSwapBuffers();
 }
