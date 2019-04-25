@@ -1,4 +1,5 @@
 #include "funkcije.h"
+#include "image.h"
 
 #include <stdio.h>
 #include <time.h>
@@ -10,7 +11,7 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 
-
+extern _podaci glob_prom; 
 
 /* Pomocne enkapsulirane (privatne) _funkcije */
 
@@ -78,7 +79,7 @@ void iscrtaj_koordinatne_ose()
 	glEnd();
 }
 
-void iscrtaj_mrezu() 
+void iscrtaj_mrezu_oko_objekta() 
 {
     glDisable(GL_LIGHTING);
     glutWireCube(1);
@@ -91,7 +92,7 @@ void iscrtaj_letelicu()
 
     /* Predefinisane komponente za gradjenje materijala */
     static GLfloat material_ambient[] = { 0.1, 0.1, 0.1, 1 };
-    static GLfloat material_diffuse[] = { 0.45, 0.45, 0.45, 1 };
+    static GLfloat material_diffuse[] = { 0.47, 0.47, 0.47, 1 };
     static GLfloat material_diffuse_lblue[] = { 0.1, 0.7, 0.6, 1 };
     static GLfloat material_diffuse_dark_gray[] = { 0.2, 0.2, 0.2, 1 };
     static GLfloat material_diffuse_red[] = { 0.8, 0.0, 0.0, 1 };
@@ -283,4 +284,133 @@ void iscrtaj_prepreku(double kompleksnost)
             }
         }
     }
+}
+
+void iscrtaj_stazu() {
+
+    glDisable(GL_LIGHTING);
+
+    glColor3f(0.02,0,0.08);
+    glPushMatrix();
+        glScalef(2,1,1);
+        glBegin(GL_QUADS);
+                glVertex3f(-2.5, -1.01, -1000);
+                glVertex3f(2.5, -1.01, -1000);
+                glVertex3f(2.5, -1.01, 10);
+                glVertex3f(-2.5, -1.01, 10);
+        glEnd();
+    glPopMatrix();
+
+    glColor3f(255,0,255);
+    glLineWidth(2);
+    glPushMatrix();
+        glScalef(2,1,1);
+        glBegin(GL_LINES);
+            for (int i=-2; i<= 3; i++) {
+                glVertex3f(i-0.5, -1, -1500);
+                glVertex3f(i-0.5, -1, 10);
+            }
+        glEnd();
+    glPopMatrix();
+}
+
+
+unsigned napravi_teksturu(Image *img) {
+    glEnable(GL_TEXTURE_2D);
+    GLuint texture_name;
+    glGenTextures(1, &texture_name);
+
+    glTexEnvf(GL_TEXTURE_ENV,
+              GL_TEXTURE_ENV_MODE,
+              GL_REPLACE);
+
+    glBindTexture(GL_TEXTURE_2D, texture_name);
+
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,
+                    GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+                img->width, img->height, 0,
+                GL_RGB, GL_UNSIGNED_BYTE, img->pixels);
+
+    glDisable(GL_TEXTURE_2D);
+
+    return texture_name;
+}
+
+
+void _iscrtaj_ravan() {
+    glPushMatrix();
+    glBegin(GL_QUADS);
+        glNormal3f(0,0,1);
+        glTexCoord2f(0, 0);
+        glVertex2f(-0.5, 0.5);
+
+        glTexCoord2f(0, 1);
+        glVertex2f(-0.5, -0.5);
+
+        glTexCoord2f(1, 1);
+        glVertex2f(0.5, -0.5);
+
+        glTexCoord2f(1, 0);
+        glVertex2f(0.5, 0.5);
+    glEnd();
+    glPopMatrix();
+}
+
+
+void _iscrtaj_kocku() {
+    // prednja
+    glPushMatrix();
+         glTranslatef(0,0,-0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+
+    // zadnja
+    glPushMatrix();
+         glRotatef(-90, 0, 0, 1);
+         glTranslatef(0,0,0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+
+    // desna
+    glPushMatrix();
+         glRotatef(90, 0, 1, 0);
+         glTranslatef(0,0,0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+
+    // leva
+    glPushMatrix();
+         glRotatef(-90, 0, 1, 0);
+         glTranslatef(0,0,0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+
+    // donja 
+    glPushMatrix();
+         glRotatef(90, 1, 0, 0);
+         glTranslatef(0,0,0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+
+    // gornja 
+    glPushMatrix();
+         glRotatef(-90, 1, 0, 0);
+         glTranslatef(0,0,0.5);
+        _iscrtaj_ravan();
+    glPopMatrix();
+}
+
+void iscrtaj_nebo() {
+    glPushMatrix();
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, glob_prom.nebo_tex_id);
+        
+        glScalef(800,800,1000);
+        _iscrtaj_kocku();
+
+        glDisable(GL_TEXTURE_2D);
+    glPopMatrix();
 }

@@ -2,7 +2,7 @@ GOAL=star-space-fighter
 CC=gcc
 FLAGS= -std=c99 -lGL -lGLU -lglut -lm -Wall -Wextra -Wno-unused
 
-$(GOAL): main.o funkcije.o
+$(GOAL): main.o funkcije.o image.o
 	$(CC) $(FLAGS) -o $@ $^
 
 main.o: main.c
@@ -10,7 +10,9 @@ main.o: main.c
 
 funkcije.o: funkcije.c
 	$(CC) $(FLAGS) -o $@ $^ -c
-
+	
+image.o: image.c
+	$(CC) $(FLAGS) -o $@ $^ -c
 
 .PHONY:
 	clean

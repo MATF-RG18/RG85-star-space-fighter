@@ -1,18 +1,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "funkcije.h"
-#include "time.h"
+#include <time.h>
+#include "image.h"
 
 /* ASCII kod za ESC key */
 #define ESC_KEY (27)
 
 /* Ukljucivanje debug moda 0 -> 1 */
-#define DEBUG (1)
+/*#define DEBUG (1)*/
 
 /* OpenGL */
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+
+// GLOBALNE PROMENLJIVE
+_podaci glob_prom = {
+    .nebo=NULL,
+    .nebo_tex_id = 0
+}; 
+
 
 static void on_display();
 static void on_reshape(int width, int height);
@@ -75,6 +83,14 @@ int main(int argc, char * argv[])
 	/* Ukljucivanje kontrole dubine (z-buffer)*/
 	glEnable(GL_DEPTH_TEST);
 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POINT_SMOOTH);
+
+    glob_prom.nebo = image_init(800, 600);
+    image_read(glob_prom.nebo, "nebo.bmp");
+    glob_prom.nebo_tex_id = napravi_teksturu(glob_prom.nebo);
+
     /* Seed za random brojeve */
     srand(time(NULL));
 	/* Ulazak u glavnu petlju programa */
@@ -99,17 +115,19 @@ static void on_display()
 	glLoadIdentity();
 
     /* Postavljanje kamere */
-	// gluLookAt(2, 1, 0, 0, 0, 0, 0, 1, 0);
+	/*gluLookAt(2, 1, -2, 0, 0, 0, 0, 1, 0);*/
 	// gluLookAt(2, 0, 0, 0, 0, 0, 0, 1, 0);
-	 gluLookAt(0, 2.2, 3, 0, 0, -3, 0, 1, 0);
-	// guLookAt(0, 0, 1, 0, 0, -3, 0, 1, 0);
-	// gluLookAt(0, 4, 0, 0, 0, 0, 0, 0, -1);
+	 gluLookAt(0, 1.8, 3, 0, 0, -3, 0, 1, 0);
+	// gluLookAt(0, 0, 1, 0, 0, -3, 0, 1, 0);
+	//  gluLookAt(0, 4, 0, 0, 0, 0, 0, 0, -1);
 
     #if DEBUG
         iscrtaj_koordinatne_ose();
-        iscrtaj_mrezu();
+        iscrtaj_mrezu_oko_objekta();
     #endif
+        iscrtaj_stazu();
         iscrtaj_letelicu();
+        iscrtaj_nebo();
 
 	glutSwapBuffers();
 }
@@ -131,6 +149,7 @@ static void on_key_press(unsigned char key, int x, int y)
 {
 	switch (key) {
 		case ESC_KEY: 
+            image_done(glob_prom.nebo);
 			exit(EXIT_SUCCESS);
 			break;
 	}
