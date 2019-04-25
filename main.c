@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "funkcije.h"
+#include "time.h"
 
 /* ASCII kod za ESC key */
 #define ESC_KEY (27)
@@ -16,6 +17,7 @@
 static void on_display();
 static void on_reshape(int width, int height);
 static void on_key_press(unsigned char key, int x, int y);
+static void on_special_key_press(int key, int x, int y);
 
 int main(int argc, char * argv[])
 {
@@ -41,6 +43,7 @@ int main(int argc, char * argv[])
 	glutReshapeFunc(on_reshape);
 	/* F-ja koja se poziva na pritisak tastera na tastaturi */
 	glutKeyboardFunc(on_key_press);
+	glutSpecialFunc(on_special_key_press);
 
 	/* Uklucivanje osvetljenja */
     GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1 };
@@ -72,6 +75,8 @@ int main(int argc, char * argv[])
 	/* Ukljucivanje kontrole dubine (z-buffer)*/
 	glEnable(GL_DEPTH_TEST);
 
+    /* Seed za random brojeve */
+    srand(time(NULL));
 	/* Ulazak u glavnu petlju programa */
 	glutMainLoop();
 
@@ -92,9 +97,13 @@ static void on_display()
 	glMatrixMode(GL_MODELVIEW);
 	/* Postavljanje MODELVIEW matrice na identity */
 	glLoadIdentity();
-	/* Gledaj u koordinatni pocetak sa poz. (3,2,0) */
-	/*gluLookAt(2, 1, 0, 0, 0, 0, 0, 1, 0);*/
-	gluLookAt(0, 2.2, 3, 0, 0, -3, 0, 1, 0);
+
+    /* Postavljanje kamere */
+	// gluLookAt(2, 1, 0, 0, 0, 0, 0, 1, 0);
+	// gluLookAt(2, 0, 0, 0, 0, 0, 0, 1, 0);
+	 gluLookAt(0, 2.2, 3, 0, 0, -3, 0, 1, 0);
+	// guLookAt(0, 0, 1, 0, 0, -3, 0, 1, 0);
+	// gluLookAt(0, 4, 0, 0, 0, 0, 0, 0, -1);
 
     #if DEBUG
         iscrtaj_koordinatne_ose();
@@ -115,7 +124,7 @@ static void on_reshape(int width, int height)
 	glLoadIdentity();
 
 	/* Ugao vidljivosti, aspect-ratio i near i far clip plane */
-	gluPerspective(60, (float) width / height, 0.1, 1500);
+	gluPerspective(60, (float) width / height, 0.01, 1500);
 }
 
 static void on_key_press(unsigned char key, int x, int y)
@@ -125,5 +134,23 @@ static void on_key_press(unsigned char key, int x, int y)
 			exit(EXIT_SUCCESS);
 			break;
 	}
+}
+
+static void on_special_key_press(int key, int x, int y)
+{
+    switch (key) {
+        case GLUT_KEY_LEFT : 
+            printf("Left key is pressed\n");
+            break;
+        case GLUT_KEY_RIGHT: 
+            printf("Right key is pressed\n");
+            break;
+        case GLUT_KEY_UP: 
+            printf("Up key is pressed\n");
+            break;
+        case GLUT_KEY_DOWN:
+            printf("Down key is pressed\n");
+            break;
+    }
 }
 
