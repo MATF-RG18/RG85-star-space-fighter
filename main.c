@@ -25,7 +25,9 @@ _podaci glob_prom = {
     /* letelica */
     .pozicija = 0.0,
     .zeljena_pozicija = 0.0,
-    .rotacija = 0.0
+    .rotacija = 0.0,
+    .min_poz = -2,
+    .max_poz = 2
 }; 
 
 static void on_display();
@@ -58,6 +60,7 @@ int main(int argc, char * argv[])
 	glutReshapeFunc(on_reshape);
 	/* F-ja koja se poziva na pritisak tastera na tastaturi */
 	glutKeyboardFunc(on_key_press);
+    glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 	glutSpecialFunc(on_special_key_press);
 
     /* Timer */
@@ -169,16 +172,14 @@ static void on_special_key_press(int key, int x, int y)
 {
     switch (key) {
         case GLUT_KEY_LEFT : 
-            printf("Left key is pressed\n");
+            skreni_levo(&glob_prom.zeljena_pozicija, glob_prom.min_poz);
             break;
         case GLUT_KEY_RIGHT: 
-            printf("Right key is pressed\n");
+            skreni_desno(&glob_prom.zeljena_pozicija, glob_prom.max_poz);
             break;
         case GLUT_KEY_UP: 
-            printf("Up key is pressed\n");
             break;
         case GLUT_KEY_DOWN:
-            printf("Down key is pressed\n");
             break;
     }
 }
@@ -186,7 +187,7 @@ static void on_special_key_press(int key, int x, int y)
 static void on_timer(int timer_id) {
     if (timer_id != glob_prom.timer_id)
         return;
-    procesuiraj_poziciju(&glob_prom.pozicija, &glob_prom.rotacija, 2.0);
+    procesuiraj_poziciju(&glob_prom.pozicija, &glob_prom.rotacija, glob_prom.zeljena_pozicija);
 
     glutPostRedisplay();
     glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);

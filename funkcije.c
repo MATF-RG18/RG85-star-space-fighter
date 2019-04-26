@@ -91,7 +91,7 @@ void iscrtaj_letelicu(double pozicija, double rotacija)
     glPushMatrix();
 
     /* Postavljanje pozicije na osnovu argumenata funkcije */
-    glTranslatef(pozicija, 0, 0);
+    glTranslatef(pozicija*1.5, 0, 0);
     glRotatef(rotacija * 50, 0, 0, -1);
 
     glEnable(GL_LIGHTING);
@@ -459,4 +459,16 @@ void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double 
     } else {
         _stabilizacija_letelice(rotacija);
     }
+}
+
+void skreni_levo(double * zeljena_pozicija, double min_poz) {
+    if (*zeljena_pozicija <= min_poz)
+        return;
+    *zeljena_pozicija -= 1.0;
+}
+
+void skreni_desno(double * zeljena_pozicija, double max_poz) {
+    if (*zeljena_pozicija >= max_poz)
+        return;
+    *zeljena_pozicija += 1.0;
 }
