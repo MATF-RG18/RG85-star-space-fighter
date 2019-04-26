@@ -86,8 +86,14 @@ void iscrtaj_mrezu_oko_objekta()
 }
 
 /* Funkcije za iscrtavanje game objekata */
-void iscrtaj_letelicu() 
+void iscrtaj_letelicu(double pozicija, double rotacija) 
 {
+    glPushMatrix();
+
+    /* Postavljanje pozicije na osnovu argumenata funkcije */
+    glTranslatef(pozicija, 0, 0);
+    glRotatef(rotacija * 50, 0, 0, -1);
+
     glEnable(GL_LIGHTING);
 
     /* Predefinisane komponente za gradjenje materijala */
@@ -235,6 +241,8 @@ void iscrtaj_letelicu()
                 glutSolidSphere(0.65, 10, 10);
             glPopMatrix();
         glPopMatrix();
+    glPopMatrix();
+
     glPopMatrix();
 }
 
@@ -413,4 +421,42 @@ void iscrtaj_nebo() {
 
         glDisable(GL_TEXTURE_2D);
     glPopMatrix();
+}
+
+void _stabilizacija_letelice(double *rotacija) {
+        /* Dovodjenje letelice u horizontalan polozaj */
+       if (fabs(*rotacija) > 0.001) {
+            double param = fabs(*rotacija/10.0);
+           *rotacija = *rotacija < 0 ? *rotacija + param : *rotacija - param;
+       }
+}
+
+void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double zeljena_pozicija) {
+    if (*pozicija_letelice < zeljena_pozicija) {
+        if (*rotacija < 0.0) 
+            _stabilizacija_letelice(rotacija);
+        //else {
+            if (*rotacija < 1.0) *rotacija+=0.1; 
+            //
+            *pozicija_letelice += 0.1 * fabs(*rotacija);
+            if (*pozicija_letelice > zeljena_pozicija) {
+                *pozicija_letelice = zeljena_pozicija;
+                _stabilizacija_letelice(rotacija);
+            }
+        //}
+    } else if (*pozicija_letelice > zeljena_pozicija) {
+        if (*rotacija > 0.0) 
+            _stabilizacija_letelice(rotacija);
+        //else {
+            if (*rotacija > -1.0) *rotacija-=0.1; 
+            //
+            *pozicija_letelice -= 0.08 * fabs(*rotacija);
+            if (*pozicija_letelice < zeljena_pozicija) {
+                *pozicija_letelice = zeljena_pozicija;
+                _stabilizacija_letelice(rotacija);
+            }
+        //}
+    } else {
+        _stabilizacija_letelice(rotacija);
+    }
 }

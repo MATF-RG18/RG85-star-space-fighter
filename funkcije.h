@@ -6,6 +6,12 @@ typedef struct Image Image;
 typedef struct {
     Image * nebo;
     unsigned nebo_tex_id;
+    int timer_id;
+    unsigned timer_interval;
+
+    double pozicija;
+    double zeljena_pozicija;
+    double rotacija;
 }_podaci;
 
 /* Funkcije za Debug-ovanje */
@@ -17,6 +23,7 @@ void iscrtaj_nebo();
 unsigned napravi_teksturu(Image *);
 
 /* Funkcije za iscrtavanje objekata */
-void iscrtaj_letelicu();
+void iscrtaj_letelicu(double pozicija_letelice, double rotacija_letelice);
+void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double zeljena_pozicija);
 
 #endif

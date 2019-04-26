@@ -18,14 +18,21 @@
 // GLOBALNE PROMENLJIVE
 _podaci glob_prom = {
     .nebo=NULL,
-    .nebo_tex_id = 0
-}; 
+    .nebo_tex_id = 0,
+    .timer_id = 0,
+    .timer_interval = 10, // 100fps,
 
+    /* letelica */
+    .pozicija = 0.0,
+    .zeljena_pozicija = 0.0,
+    .rotacija = 0.0
+}; 
 
 static void on_display();
 static void on_reshape(int width, int height);
 static void on_key_press(unsigned char key, int x, int y);
 static void on_special_key_press(int key, int x, int y);
+static void on_timer(int timer_id);
 
 int main(int argc, char * argv[])
 {
@@ -52,6 +59,9 @@ int main(int argc, char * argv[])
 	/* F-ja koja se poziva na pritisak tastera na tastaturi */
 	glutKeyboardFunc(on_key_press);
 	glutSpecialFunc(on_special_key_press);
+
+    /* Timer */
+   glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);
 
 	/* Uklucivanje osvetljenja */
     GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1 };
@@ -126,7 +136,7 @@ static void on_display()
         iscrtaj_mrezu_oko_objekta();
     #endif
         iscrtaj_stazu();
-        iscrtaj_letelicu();
+        iscrtaj_letelicu(glob_prom.pozicija, glob_prom.rotacija);
         iscrtaj_nebo();
 
 	glutSwapBuffers();
@@ -173,3 +183,11 @@ static void on_special_key_press(int key, int x, int y)
     }
 }
 
+static void on_timer(int timer_id) {
+    if (timer_id != glob_prom.timer_id)
+        return;
+    procesuiraj_poziciju(&glob_prom.pozicija, &glob_prom.rotacija, 2.0);
+
+    glutPostRedisplay();
+    glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);
+}
