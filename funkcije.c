@@ -325,7 +325,7 @@ unsigned napravi_teksturu(Image *img)
 }
 
 
-void _iscrtaj_ravan() 
+static void _iscrtaj_ravan() 
 {
     glPushMatrix();
     glBegin(GL_QUADS);
@@ -346,7 +346,7 @@ void _iscrtaj_ravan()
 }
 
 
-void _iscrtaj_kocku() 
+static void _iscrtaj_kocku() 
 {
     // prednja
     glPushMatrix();
@@ -402,7 +402,7 @@ void iscrtaj_nebo(unsigned tex_id) {
     glPopMatrix();
 }
 
-void _stabilizacija_letelice(double *rotacija) 
+static void _stabilizacija_letelice(double *rotacija) 
 {
         /* Dovodjenje letelice u horizontalan polozaj */
        if (fabs(*rotacija) > 0.001) {
@@ -456,7 +456,7 @@ void skreni_desno(double * zeljena_pozicija, double max_poz)
     *zeljena_pozicija += 1.0;
 }
 
-void _iscrtaj_standardnu_prepreku() {
+static void _iscrtaj_standardnu_prepreku() {
     glPushMatrix();
 
         glEnable(GL_LIGHTING);
@@ -490,7 +490,7 @@ void _iscrtaj_standardnu_prepreku() {
     glPopMatrix();
 }
 
-void _iscrtaj_prepreku(char tip_prepreke) {
+static void _iscrtaj_prepreku(char tip_prepreke) {
     switch (tip_prepreke) {
         case '#' : _iscrtaj_standardnu_prepreku();
            break;
