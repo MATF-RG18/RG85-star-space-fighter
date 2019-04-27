@@ -23,7 +23,7 @@ _podaci glob_prom = {
     .tekst_na_centru_ekrana = "Da zapocnes igru pritisni 'G'",
     .tekst_u_donjem_levom_uglu = "",
     .tekst_u_donjem_desnom_uglu = "Score: 0",
-    .view_distance = 100,
+    .view_distance = 70,
     .timer_id = 0,
     .timer_interval = 17, // oko 60 fps,
     .igra_aktivna = false,
@@ -51,41 +51,41 @@ static void on_timer(int timer_id);
 
 int main(int argc, char * argv[])
 {
-	/* Inicijalizacija GLUT biblioteke */
-	glutInit(&argc, argv);
+    /* Inicijalizacija GLUT biblioteke */
+    glutInit(&argc, argv);
 
-	/* Inicijalizacija moda za prikaz */
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    /* Inicijalizacija moda za prikaz */
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-	/* Postavljanje velicine prozora */
-	glutInitWindowSize(800, 600);
+    /* Postavljanje velicine prozora */
+    glutInitWindowSize(800, 600);
 
-	/* Pozocija prozora - koord. pocetak je cosak gore levo */
-	glutInitWindowPosition(100, 100);
+    /* Pozocija prozora - koord. pocetak je cosak gore levo */
+    glutInitWindowPosition(100, 100);
 
-	/* Kreiranje prozora */
-	glutCreateWindow("Titl programa");
+    /* Kreiranje prozora */
+    glutCreateWindow("Titl programa");
 
     /* Pokretanje preko celog ekrana */
     glutFullScreen();
 
-	/* Registruju se callback funkcije */
-	/* Funkcija koja se poziva za iscrtavanje */
-	glutDisplayFunc(on_display);
-	/* F-ja koja se poziva kada dodje do promene vel. prozora */
-	glutReshapeFunc(on_reshape);
-	/* F-ja koja se poziva na pritisak tastera na tastaturi */
-	glutKeyboardFunc(on_key_press);
+    /* Registruju se callback funkcije */
+    /* Funkcija koja se poziva za iscrtavanje */
+    glutDisplayFunc(on_display);
+    /* F-ja koja se poziva kada dodje do promene vel. prozora */
+    glutReshapeFunc(on_reshape);
+    /* F-ja koja se poziva na pritisak tastera na tastaturi */
+    glutKeyboardFunc(on_key_press);
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
 
-	glutSpecialFunc(on_special_key_press);
+    glutSpecialFunc(on_special_key_press);
 
     glutSetCursor(GLUT_CURSOR_NONE);
 
     /* Timer */
    glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);
 
-	/* Uklucivanje osvetljenja */
+    /* Uklucivanje osvetljenja */
     GLfloat light_ambient[] = { 0.2, 0.2, 0.2, 1 };
     GLfloat light_diffuse[] = { 1, 1, 1, 1 };
     GLfloat light_specular[] = { 1, 1, 1, 1 };
@@ -93,7 +93,7 @@ int main(int argc, char * argv[])
     /* Ambijentalno osvetljenje scene. */
     GLfloat model_ambient[] = { 0.5, 0.5, 0.5, 1 };
 
-	glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     GLfloat light_position[] = { 1, 1, 1, 0 };
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
@@ -102,17 +102,17 @@ int main(int argc, char * argv[])
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, model_ambient);
 
     /* Normalizacija normala */
-	glEnable(GL_NORMALIZE);
+    glEnable(GL_NORMALIZE);
 
     /* Pozicionira se svijetlo. */
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-	/* Inicijalizacija OpenGL biblioteke */
-	/* Default boja u frame buffer-a kojom se cisti ekran */
-	glClearColor(0, 0, 0, 0);
+    /* Inicijalizacija OpenGL biblioteke */
+    /* Default boja u frame buffer-a kojom se cisti ekran */
+    glClearColor(0, 0, 0, 0);
 
-	/* Ukljucivanje kontrole dubine (z-buffer)*/
-	glEnable(GL_DEPTH_TEST);
+    /* Ukljucivanje kontrole dubine (z-buffer)*/
+    glEnable(GL_DEPTH_TEST);
 
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -131,30 +131,30 @@ int main(int argc, char * argv[])
 
     glob_prom.matrica_nivoa = alociraj_i_ucitaj_nivo("nivo1.txt", &glob_prom.br_redova, &glob_prom.br_prepr_u_redu);
 
-	/* Ulazak u glavnu petlju programa */
-	glutMainLoop();
+    /* Ulazak u glavnu petlju programa */
+    glutMainLoop();
 
-	return 0;
+    return 0;
 }
 
 static void on_display()
 {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	/* Ovde se iscrtavaju sva cuda */
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    /* Ovde se iscrtavaju sva cuda */
 
     /* Pozicionira se svijetlo. */
     static GLfloat light_position[] = {0, 0.5, -2.5, 0 }; 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
 
-	/* Ucitavanje MODELVIEW matrice */
-	glMatrixMode(GL_MODELVIEW);
+    /* Ucitavanje MODELVIEW matrice */
+    glMatrixMode(GL_MODELVIEW);
 
-	/* Postavljanje MODELVIEW matrice na identity */
-	glLoadIdentity();
+    /* Postavljanje MODELVIEW matrice na identity */
+    glLoadIdentity();
 
     /* Postavljanje kamere */
-	gluLookAt(glob_prom.pozicija*glob_prom.sirina_linije_staze, 1.8, 3, glob_prom.pozicija*glob_prom.sirina_linije_staze, 0, -3, 0, 1, 0);
+    gluLookAt(glob_prom.pozicija*glob_prom.sirina_linije_staze, 1.8, 3, glob_prom.pozicija*glob_prom.sirina_linije_staze, 0, -3, 0, 1, 0);
 
     iscrtaj_nebo(glob_prom.tex_nebo_id);
     iscrtaj_stazu(glob_prom.sirina_linije_staze);
@@ -181,26 +181,26 @@ static void on_display()
 
 static void on_reshape(int width, int height)
 {
-	/* Postavlja se viewport (velicina vidljive povrsine) */
-	glViewport(0, 0, width, height);
+    /* Postavlja se viewport (velicina vidljive povrsine) */
+    glViewport(0, 0, width, height);
 
-	/* Postavljaju se parametri projekcije */
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    /* Postavljaju se parametri projekcije */
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 
-	/* Ugao vidljivosti, aspect-ratio i near i far clip plane */
-	gluPerspective(60, (float) width / height, 0.01, 1500);
+    /* Ugao vidljivosti, aspect-ratio i near i far clip plane */
+    gluPerspective(60, (float) width / height, 0.01, 1500);
     glob_prom.sirina_ekrana = width;
     glob_prom.duzina_ekrana = height;
 }
 
 static void on_key_press(unsigned char key, int x, int y)
 {
-	switch (key) {
-		case ESC_KEY: 
+    switch (key) {
+        case ESC_KEY: 
             dealociraj_i_obrisi_nivo(glob_prom.matrica_nivoa, glob_prom.br_redova);
-			exit(EXIT_SUCCESS);
-			break;
+            exit(EXIT_SUCCESS);
+            break;
         case 'g':
         case 'G':
             if (glob_prom.igra_aktivna == false && glob_prom.param_predj_puta < glob_prom.br_redova) {
@@ -215,7 +215,7 @@ static void on_key_press(unsigned char key, int x, int y)
             glutPostRedisplay();
             strcpy(glob_prom.tekst_na_centru_ekrana, "Da zapocnes igru pritisni 'G'");
             break;
-	}
+    }
 }
 
 static void on_special_key_press(int key, int x, int y)
