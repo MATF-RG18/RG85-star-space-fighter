@@ -472,7 +472,7 @@ void _iscrtaj_standardnu_prepreku() {
         glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
         glMaterialfv(GL_FRONT, GL_EMISSION, material_emission);
 
-        _iscrtaj_kocku();
+        glutSolidCube(1);
         glDisable(GL_LIGHTING);
 
         #if DEBUG
@@ -484,7 +484,7 @@ void _iscrtaj_standardnu_prepreku() {
             glScalef(0.8, 1.0, 0.8);
             glColor3f(1,0.8,1);
             glTranslatef(0, 0.01, 0);
-            _iscrtaj_kocku();
+            glutSolidCube(1);
         glPopMatrix();
         
     glPopMatrix();
