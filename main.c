@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "funkcije.h"
 #include <time.h>
-#include "image.h"
+#include <string.h>
 
+#include "funkcije.h"
+#include "image.h"
+    
 /* ASCII kod za ESC key */
 #define ESC_KEY (27)
-
-/* Ukljucivanje debug moda 0 -> 1 */
-/*#define DEBUG (1)*/
 
 /* OpenGL */
 #include <GL/gl.h>
@@ -17,17 +16,31 @@
 
 // GLOBALNE PROMENLJIVE
 _podaci glob_prom = {
-    .nebo=NULL,
-    .nebo_tex_id = 0,
+    .tex_nebo_id = 0,
+
+    .sirina_ekrana = 0,
+    .duzina_ekrana = 0,
+    .tekst_na_centru_ekrana = "Da zapocnes igru pritisni 'G'",
+    .tekst_u_donjem_levom_uglu = "",
+    .tekst_u_donjem_desnom_uglu = "Score: 0",
+    .view_distance = 70,
     .timer_id = 0,
-    .timer_interval = 10, // 100fps,
+    .timer_interval = 17, // oko 60 fps,
+    .igra_aktivna = false,
+    .param_predj_puta = 0.0,
 
     /* letelica */
     .pozicija = 0.0,
     .zeljena_pozicija = 0.0,
     .rotacija = 0.0,
     .min_poz = -2,
-    .max_poz = 2
+    .max_poz = 2,
+    .sirina_linije_staze = 2.0,
+
+    /* matrica nivoa */
+    .matrica_nivoa = NULL,
+    .br_redova = 0,
+    .br_prepr_u_redu = 0
 }; 
 
 static void on_display();
@@ -61,7 +74,10 @@ int main(int argc, char * argv[])
 	/* F-ja koja se poziva na pritisak tastera na tastaturi */
 	glutKeyboardFunc(on_key_press);
     glutSetKeyRepeat(GLUT_KEY_REPEAT_OFF);
+
 	glutSpecialFunc(on_special_key_press);
+
+    glutSetCursor(GLUT_CURSOR_NONE);
 
     /* Timer */
    glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);
@@ -88,7 +104,6 @@ int main(int argc, char * argv[])
     /* Pozicionira se svijetlo. */
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-
 	/* Inicijalizacija OpenGL biblioteke */
 	/* Default boja u frame buffer-a kojom se cisti ekran */
 	glClearColor(0, 0, 0, 0);
@@ -100,12 +115,19 @@ int main(int argc, char * argv[])
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_POINT_SMOOTH);
 
-    glob_prom.nebo = image_init(800, 600);
-    image_read(glob_prom.nebo, "nebo.bmp");
-    glob_prom.nebo_tex_id = napravi_teksturu(glob_prom.nebo);
+    /* Uvitavnje tekstura */
+    Image * nebo = image_init(1024, 1024);
+    image_read(nebo, "nebo.bmp");
+    glob_prom.tex_nebo_id = napravi_teksturu(nebo);
+    image_done(nebo);
 
     /* Seed za random brojeve */
     srand(time(NULL));
+
+    /* Ucitavanje nivoa */
+
+    glob_prom.matrica_nivoa = alociraj_i_ucitaj_nivo("nivo1.txt", &glob_prom.br_redova, &glob_prom.br_prepr_u_redu);
+
 	/* Ulazak u glavnu petlju programa */
 	glutMainLoop();
 
@@ -124,25 +146,34 @@ static void on_display()
 
 	/* Ucitavanje MODELVIEW matrice */
 	glMatrixMode(GL_MODELVIEW);
+
 	/* Postavljanje MODELVIEW matrice na identity */
 	glLoadIdentity();
 
     /* Postavljanje kamere */
-	/*gluLookAt(2, 1, -2, 0, 0, 0, 0, 1, 0);*/
-	// gluLookAt(2, 0, 0, 0, 0, 0, 0, 1, 0);
-	 gluLookAt(0, 1.8, 3, 0, 0, -3, 0, 1, 0);
-	// gluLookAt(0, 0, 1, 0, 0, -3, 0, 1, 0);
-	//  gluLookAt(0, 4, 0, 0, 0, 0, 0, 0, -1);
+	gluLookAt(glob_prom.pozicija*glob_prom.sirina_linije_staze, 1.8, 3, glob_prom.pozicija*glob_prom.sirina_linije_staze, 0, -3, 0, 1, 0);
 
-    #if DEBUG
-        iscrtaj_koordinatne_ose();
-        iscrtaj_mrezu_oko_objekta();
-    #endif
-        iscrtaj_stazu();
-        iscrtaj_letelicu(glob_prom.pozicija, glob_prom.rotacija);
-        iscrtaj_nebo();
+    iscrtaj_nebo(glob_prom.tex_nebo_id);
+    iscrtaj_stazu(glob_prom.sirina_linije_staze);
+    iscrtaj_letelicu(glob_prom.pozicija, glob_prom.rotacija, glob_prom.sirina_linije_staze);
+    iscrtaj_prepreke(glob_prom.param_predj_puta, glob_prom.matrica_nivoa, glob_prom.br_redova, glob_prom.br_prepr_u_redu, glob_prom.view_distance, glob_prom.sirina_linije_staze);
 
-	glutSwapBuffers();
+    // Ako ima kolizije sa preprekom
+    if (proveri_koliziju(glob_prom.pozicija, glob_prom.param_predj_puta, glob_prom.min_poz, glob_prom.matrica_nivoa, glob_prom.br_redova)) {
+            zaustavi_igru();
+            glutPostRedisplay();
+            strcpy(glob_prom.tekst_na_centru_ekrana, "Kraj igre, pritisnite 'R' za restart");
+    }
+
+    ispisi_tekst(glob_prom.tekst_na_centru_ekrana, glob_prom.sirina_ekrana/2 - strlen(glob_prom.tekst_na_centru_ekrana)*5, glob_prom.duzina_ekrana/2 - 10, 1, 0, 1, glob_prom.sirina_ekrana, glob_prom.duzina_ekrana); 
+
+    sprintf(glob_prom.tekst_u_donjem_levom_uglu, "Score: %d", (int) glob_prom.param_predj_puta * 10);
+    ispisi_tekst(glob_prom.tekst_u_donjem_levom_uglu, 10, 24, 1, 0, 1, glob_prom.sirina_ekrana, glob_prom.duzina_ekrana); 
+
+    //sprintf(glob_prom.tekst_u_donjem_desnom_uglu, "Score: %d", (int) glob_prom.param_predj_puta * 10);
+    //ispisi_tekst(glob_prom.tekst_u_donjem_desnom_uglu, glob_prom.sirina_ekrana-140, 24, 1, 0, 1, glob_prom.sirina_ekrana, glob_prom.duzina_ekrana); 
+
+    glutSwapBuffers();
 }
 
 static void on_reshape(int width, int height)
@@ -156,15 +187,31 @@ static void on_reshape(int width, int height)
 
 	/* Ugao vidljivosti, aspect-ratio i near i far clip plane */
 	gluPerspective(60, (float) width / height, 0.01, 1500);
+    glob_prom.sirina_ekrana = width;
+    glob_prom.duzina_ekrana = height;
 }
 
 static void on_key_press(unsigned char key, int x, int y)
 {
 	switch (key) {
 		case ESC_KEY: 
-            image_done(glob_prom.nebo);
+            dealociraj_i_obrisi_nivo(glob_prom.matrica_nivoa, glob_prom.br_redova);
 			exit(EXIT_SUCCESS);
 			break;
+        case 'g':
+        case 'G':
+            if (glob_prom.igra_aktivna == false && glob_prom.param_predj_puta < glob_prom.br_redova) {
+                glob_prom.igra_aktivna = true;
+                glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id); 
+                strcpy(glob_prom.tekst_na_centru_ekrana, "");
+            }
+            break;
+        case 'r': 
+        case 'R':
+            restartuj_igru();
+            glutPostRedisplay();
+            strcpy(glob_prom.tekst_na_centru_ekrana, "Da zapocnes igru pritisni 'G'");
+            break;
 	}
 }
 
@@ -172,10 +219,12 @@ static void on_special_key_press(int key, int x, int y)
 {
     switch (key) {
         case GLUT_KEY_LEFT : 
-            skreni_levo(&glob_prom.zeljena_pozicija, glob_prom.min_poz);
+            if (glob_prom.igra_aktivna)
+                skreni_levo(&glob_prom.zeljena_pozicija, glob_prom.min_poz);
             break;
         case GLUT_KEY_RIGHT: 
-            skreni_desno(&glob_prom.zeljena_pozicija, glob_prom.max_poz);
+            if (glob_prom.igra_aktivna)
+                skreni_desno(&glob_prom.zeljena_pozicija, glob_prom.max_poz);
             break;
         case GLUT_KEY_UP: 
             break;
@@ -185,9 +234,16 @@ static void on_special_key_press(int key, int x, int y)
 }
 
 static void on_timer(int timer_id) {
-    if (timer_id != glob_prom.timer_id)
+    if (timer_id != glob_prom.timer_id || !glob_prom.igra_aktivna)
         return;
     procesuiraj_poziciju(&glob_prom.pozicija, &glob_prom.rotacija, glob_prom.zeljena_pozicija);
+
+    glob_prom.param_predj_puta += 0.125 + 0.00001*glob_prom.param_predj_puta;
+
+    if (glob_prom.br_redova < glob_prom.param_predj_puta) {
+        sprintf(glob_prom.tekst_na_centru_ekrana, "Presli ste igru, osvojeno: %d poena", (int)glob_prom.param_predj_puta*10);
+        zaustavi_igru();
+    }
 
     glutPostRedisplay();
     glutTimerFunc(glob_prom.timer_interval, on_timer, glob_prom.timer_id);

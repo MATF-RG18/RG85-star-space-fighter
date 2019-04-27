@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <math.h>
+#include <string.h>
 
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
+
+#define MAX_IN_LINE (1000)
 
 extern _podaci glob_prom; 
 
@@ -67,12 +69,12 @@ void iscrtaj_koordinatne_ose()
 		glVertex3f(1,0,0);
 
 		/* Y osa */
-		glColor3f(0,0,1);
+		glColor3f(0,1,0);
 		glVertex3f(0,-1,0);
 		glVertex3f(0,1,0);
 
 		/* Z osa */
-		glColor3f(0,1,0);
+		glColor3f(0,0,1);
 		glVertex3f(0,0,-1);
 		glVertex3f(0,0,1);
 
@@ -82,18 +84,27 @@ void iscrtaj_koordinatne_ose()
 void iscrtaj_mrezu_oko_objekta() 
 {
     glDisable(GL_LIGHTING);
+    glColor3f(0,1,0);
     glutWireCube(1);
 }
 
 /* Funkcije za iscrtavanje game objekata */
-void iscrtaj_letelicu(double pozicija, double rotacija) 
+void iscrtaj_letelicu(double pozicija, double rotacija, double sirina_linije_staze)
 {
     glPushMatrix();
-
+   
     /* Postavljanje pozicije na osnovu argumenata funkcije */
-    glTranslatef(pozicija*1.5, 0, 0);
+    glScalef(sirina_linije_staze, 1, 1);
+    glTranslatef(pozicija, 0, 0);
+    glScalef(1/sirina_linije_staze, 1, 1);
     glRotatef(rotacija * 50, 0, 0, -1);
 
+    #if DEBUG
+        glDisable(GL_LIGHTING);
+        iscrtaj_koordinatne_ose();
+        iscrtaj_mrezu_oko_objekta();
+    #endif
+    
     glEnable(GL_LIGHTING);
 
     /* Predefinisane komponente za gradjenje materijala */
@@ -112,7 +123,6 @@ void iscrtaj_letelicu(double pozicija, double rotacija)
     static GLfloat material_emission[] = { 0.1, 0.1, 0.1, 0 };
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
@@ -243,87 +253,54 @@ void iscrtaj_letelicu(double pozicija, double rotacija)
         glPopMatrix();
     glPopMatrix();
 
+    
     glPopMatrix();
 }
 
-void iscrtaj_prepreku(double kompleksnost) 
+void iscrtaj_stazu(double sirina_linije_staze) 
 {
-    int br_celija = 9;
-    int max_celija = floor(kompleksnost*br_celija);
-    int velicina_prepreke = rand() % (max_celija+1);
-
-    int i=rand()%(max_celija+1);
-    bool niz[max_celija]; 
-
-    for (int i=0; i<max_celija; i++)
-        niz[i] = false;
-
-    //printf("%d ", velicina_prepreke);
-    //fflush(stdout);
-
-    while (velicina_prepreke--) {
-        niz[i] = true;
-        i = (i+1)%(max_celija+1);
-    }
-
-    /* Predefinisane komponente za gradjenje materijala */
-    static GLfloat material_ambient[] = { 0.1, 0.1, 0.1, 1 };
-    static GLfloat material_diffuse[] = { 0.8, 0.2, 0.5, 1 };
-    static GLfloat material_specular[] = { 0.07, 0.07, 0.07, 1 };
-    static GLfloat shininess[] = { 5 };
-    static GLfloat material_emission[] = { 0.1, 0.1, 0.1, 0 };
-
-    glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
-    glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
-    glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
-    glMaterialfv(GL_FRONT, GL_EMISSION, material_emission);
-
-
-    for (int i=-1; i<=1; i++) {
-        for (int j=-1; j<=1; j++) {
-            if (niz[i+i*j] == true) {
-                    glPushMatrix();
-                        glScalef(1.5, 1, 1);
-                        glTranslatef(j, i, 0);
-                        glutSolidCube(1);
-                    glPopMatrix();
-            }
-        }
-    }
-}
-
-void iscrtaj_stazu() {
-
     glDisable(GL_LIGHTING);
 
     glColor3f(0.02,0,0.08);
     glPushMatrix();
-        glScalef(2,1,1);
+        glScalef(sirina_linije_staze,1,1);
         glBegin(GL_QUADS);
-                glVertex3f(-2.5, -1.01, -1000);
-                glVertex3f(2.5, -1.01, -1000);
+                glVertex3f(-2.5, -1.01, -500);
+                glVertex3f(2.5, -1.01, -500);
                 glVertex3f(2.5, -1.01, 10);
                 glVertex3f(-2.5, -1.01, 10);
         glEnd();
     glPopMatrix();
 
-    glColor3f(255,0,255);
-    glLineWidth(2);
+    glColor3f(255,255,255);
+    glLineWidth(1);
     glPushMatrix();
-        glScalef(2,1,1);
+        glScalef(sirina_linije_staze,1,1);
         glBegin(GL_LINES);
             for (int i=-2; i<= 3; i++) {
-                glVertex3f(i-0.5, -1, -1500);
+                glVertex3f(i-0.5, -1, -500);
                 glVertex3f(i-0.5, -1, 10);
             }
         glEnd();
     glPopMatrix();
+
+    glColor3f(255,0,255);
+    glLineWidth(5);
+    glPushMatrix();
+        glScalef(sirina_linije_staze,1,1);
+        glBegin(GL_LINES);
+            for (int i=-2; i<= 3; i++) {
+                glVertex3f(i-0.5, -1, -500);
+                glVertex3f(i-0.5, -1, 10);
+            }
+        glEnd();
+
+    glPopMatrix();
 }
 
 
-unsigned napravi_teksturu(Image *img) {
+unsigned napravi_teksturu(Image *img) 
+{
     glEnable(GL_TEXTURE_2D);
     GLuint texture_name;
     glGenTextures(1, &texture_name);
@@ -348,7 +325,8 @@ unsigned napravi_teksturu(Image *img) {
 }
 
 
-void _iscrtaj_ravan() {
+void _iscrtaj_ravan() 
+{
     glPushMatrix();
     glBegin(GL_QUADS);
         glNormal3f(0,0,1);
@@ -368,7 +346,8 @@ void _iscrtaj_ravan() {
 }
 
 
-void _iscrtaj_kocku() {
+void _iscrtaj_kocku() 
+{
     // prednja
     glPushMatrix();
          glTranslatef(0,0,-0.5);
@@ -411,10 +390,10 @@ void _iscrtaj_kocku() {
     glPopMatrix();
 }
 
-void iscrtaj_nebo() {
+void iscrtaj_nebo(unsigned tex_id) {
     glPushMatrix();
         glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, glob_prom.nebo_tex_id);
+        glBindTexture(GL_TEXTURE_2D, tex_id);
         
         glScalef(800,800,1000);
         _iscrtaj_kocku();
@@ -423,7 +402,8 @@ void iscrtaj_nebo() {
     glPopMatrix();
 }
 
-void _stabilizacija_letelice(double *rotacija) {
+void _stabilizacija_letelice(double *rotacija) 
+{
         /* Dovodjenje letelice u horizontalan polozaj */
        if (fabs(*rotacija) > 0.001) {
             double param = fabs(*rotacija/10.0);
@@ -431,7 +411,8 @@ void _stabilizacija_letelice(double *rotacija) {
        }
 }
 
-void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double zeljena_pozicija) {
+void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double zeljena_pozicija) 
+{
     if (*pozicija_letelice < zeljena_pozicija) {
         if (*rotacija < 0.0) 
             _stabilizacija_letelice(rotacija);
@@ -461,14 +442,183 @@ void procesuiraj_poziciju(double * pozicija_letelice, double * rotacija, double 
     }
 }
 
-void skreni_levo(double * zeljena_pozicija, double min_poz) {
+void skreni_levo(double * zeljena_pozicija, double min_poz) 
+{
     if (*zeljena_pozicija <= min_poz)
         return;
     *zeljena_pozicija -= 1.0;
 }
 
-void skreni_desno(double * zeljena_pozicija, double max_poz) {
+void skreni_desno(double * zeljena_pozicija, double max_poz) 
+{
     if (*zeljena_pozicija >= max_poz)
         return;
     *zeljena_pozicija += 1.0;
+}
+
+void _iscrtaj_standardnu_prepreku() {
+    glPushMatrix();
+
+        glEnable(GL_LIGHTING);
+        static GLfloat material_ambient[] = { 0.0, 0.0, 0.0, 1 };
+        static GLfloat material_diffuse[] = { 0.4, 0.0, 0.4, 1 };
+        static GLfloat material_specular[] = { 0.1, 0.1, 0.1, 1 };
+        static GLfloat shininess[] = { 30 };
+        static GLfloat material_emission[] = { 0.3, 0.1, 0.3, 1 };
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT, material_ambient);
+        glMaterialfv(GL_FRONT, GL_DIFFUSE, material_diffuse);
+        glMaterialfv(GL_FRONT, GL_SPECULAR, material_specular);
+        glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
+        glMaterialfv(GL_FRONT, GL_EMISSION, material_emission);
+
+        _iscrtaj_kocku();
+        glDisable(GL_LIGHTING);
+
+        #if DEBUG
+            iscrtaj_koordinatne_ose();
+            iscrtaj_mrezu_oko_objekta();
+        #endif
+
+        glPushMatrix();
+            glScalef(0.8, 1.0, 0.8);
+            glColor3f(1,0.8,1);
+            glTranslatef(0, 0.01, 0);
+            _iscrtaj_kocku();
+        glPopMatrix();
+        
+    glPopMatrix();
+}
+
+void _iscrtaj_prepreku(char tip_prepreke) {
+    switch (tip_prepreke) {
+        case '#' : _iscrtaj_standardnu_prepreku();
+           break;
+
+    }
+}
+
+void iscrtaj_prepreke(double param_predj_puta, char ** matrica_nivoa, int br_redova, int br_prepr_u_redu, int max_vidjlivih_redova, double sirina_linije_staze)
+{
+    glPushMatrix();
+        glTranslatef(0, -0.6, 0);
+        glScalef(sirina_linije_staze, 0.4, sirina_linije_staze);
+        glTranslatef(-br_prepr_u_redu/2, 0, param_predj_puta - floor(param_predj_puta));
+
+        int m =  abs(4 > (int) param_predj_puta ? (int) param_predj_puta : -4);
+        glTranslatef(0,0,m);
+
+        int vidljivost = nearbyint(param_predj_puta) + max_vidjlivih_redova;
+        int n = br_redova < vidljivost ? br_redova : vidljivost;
+        for (int i = (int) param_predj_puta - m; i < n; i++) {
+            int j;
+            for (j = 0; j < br_prepr_u_redu; j++) {
+                _iscrtaj_prepreku(matrica_nivoa[i][j]);
+                glTranslatef(1,0,0);
+            }
+            glTranslatef(-j, 0, -1);
+        }
+    glPopMatrix();
+}
+
+
+char ** alociraj_i_ucitaj_nivo(char * putanja, int * br_redova, int * br_prepr_u_redu) {
+    FILE * f;
+    f = fopen(putanja, "r");
+    if (f == NULL) {
+        perror("Greska pri otvaranju fajla");
+        exit(EXIT_FAILURE);
+    }
+
+    char buf[MAX_IN_LINE];
+
+    fscanf(f, "%d\n", br_redova);
+    fscanf(f, "%d\n", br_prepr_u_redu);
+
+    char ** matrica_nivoa = NULL;
+    matrica_nivoa = (char **) malloc(sizeof(char*) * (*br_redova)); 
+    if (*matrica_nivoa == NULL) {
+       fprintf(stderr, "Greska pri alokaciji\n");
+       exit(EXIT_FAILURE);
+    }
+
+    int i = 0;
+    while ( fgets(buf, 100, f) != NULL ) {
+       matrica_nivoa[i] = NULL;
+       matrica_nivoa[i] = (char *) malloc(sizeof(char) * (*br_prepr_u_redu)); 
+       if (matrica_nivoa[i] == NULL) {
+                dealociraj_i_obrisi_nivo(matrica_nivoa, i);
+                fprintf(stderr, "Greska pri alokaciji\n");
+                exit(EXIT_FAILURE);
+       } else {
+            for (int j = 0; j < *br_prepr_u_redu; j++) {
+               matrica_nivoa[i][j] = buf[j*2];
+           }
+        }
+        i++;
+    }
+
+    return matrica_nivoa;
+}
+
+void dealociraj_i_obrisi_nivo(char ** matrica_nivoa, int br_redova) 
+{
+    for (int i=0; i < br_redova; i++) {
+                free(matrica_nivoa[i]);
+    }
+    free(matrica_nivoa);
+}
+
+bool proveri_koliziju(double tr_poz, double param_predj_puta, double min_poz, char ** matrica_nivoa, int br_redova) 
+{
+    int i = nearbyint(param_predj_puta);
+    int j = nearbyint(tr_poz+fabs(min_poz));
+    if (i < br_redova) 
+        if (matrica_nivoa[i][j] == '#')
+            return true;
+
+    return false;
+}
+
+void ispisi_tekst(char * tekst, int x, int y, float r, float g, float b, int sirina_ekrana, int duzina_ekrana)
+{
+	glDisable(GL_LIGHTING);
+
+    glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+    glLoadIdentity();
+
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+
+	glColor4f(r, g, b, 1.0 );
+	glOrtho(0, sirina_ekrana, 0, duzina_ekrana, -1, 1);
+
+	glRasterPos2f(x, y);
+
+	int len= strlen(tekst);
+	for (int i = 0; i < len; i++) {
+		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, tekst[i]);
+	}
+
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix();
+
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+}
+
+void zaustavi_igru() 
+{
+    glob_prom.igra_aktivna = false;
+}
+
+void restartuj_igru() 
+{
+    glob_prom.igra_aktivna = false;
+    glob_prom.param_predj_puta = 0.0;
+    glob_prom.pozicija = 0.0;
+    glob_prom.rotacija = 0.0;
+    glob_prom.zeljena_pozicija = 0.0;
 }
