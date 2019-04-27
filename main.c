@@ -66,6 +66,9 @@ int main(int argc, char * argv[])
 	/* Kreiranje prozora */
 	glutCreateWindow("Titl programa");
 
+    /* Pokretanje preko celog ekrana */
+    glutFullScreen();
+
 	/* Registruju se callback funkcije */
 	/* Funkcija koja se poziva za iscrtavanje */
 	glutDisplayFunc(on_display);
