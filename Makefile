@@ -1,9 +1,10 @@
 GOAL=star-space-fighter
 CC=gcc
-FLAGS= -std=c11 -lGL -lGLU -lglut -lm -Wall -Wextra -Wno-unused -O3
+FLAGS= -std=c11  -lm -Wall -Wextra -Wno-unused -O3
+OGL=-lGL -lGLU -lglut
 
 $(GOAL): main.o funkcije.o image.o
-	$(CC) $(FLAGS) -o $@ $^
+	$(CC) $(FLAGS) $(OGL) -o $@ $^
 
 main.o: main.c funkcije.h funkcije.c
 	$(CC) $(FLAGS) -o $@ $< -c
