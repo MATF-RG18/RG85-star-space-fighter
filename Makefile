@@ -1,6 +1,6 @@
 GOAL=star-space-fighter
 CC=gcc
-FLAGS= -std=c11  -lm -Wall -Wextra -Wno-unused -O3
+FLAGS= -lm -Wall -Wextra -Wno-unused -O3
 OGL=-lGL -lGLU -lglut
 
 $(GOAL): main.o funkcije.o image.o
