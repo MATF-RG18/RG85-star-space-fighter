@@ -5,7 +5,7 @@ Star space fighter
 
 
 
-*- Igra pocinje pritiskom na taster 'G'.*
+* Igra pocinje pritiskom na taster 'G'.
 
 *- Zadatak je izbeci prepreke na stazi.*
 
